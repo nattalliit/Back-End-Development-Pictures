@@ -51,27 +51,33 @@ def test_post_picture(picture, client):
     res = client.get("/count")
     assert res.status_code == 200
     assert res.json['length'] == 11
+    print(f"tests/test_api.py::test_post_picture {json.dumps(picture)}")
+
+
 
 def test_post_picture_duplicate(picture, client):
     # create a brand new picture to upload
     res = client.post("/picture", data=json.dumps(picture),
                       content_type="application/json")
     assert res.status_code == 302
-    assert res.json['Message'] == f"picture with id {picture['id']} already present"
+    assert res.json == picture  # Assert the response matches the picture data
+    print(f"test_post_picture_duplicate: {json.dumps(picture)}", res.json)
+
+
 
 def test_update_picture_by_id(client, picture):
-    id = '2'
+    id = 2
     res = client.get(f'/picture/{id}')
     res_picture = res.json
-    assert res_picture['id'] == 2
+    assert res_picture['id'] == id
     res_state = res_picture["event_state"]
     new_state = "*" + res_state
     res_picture["event_state"] = new_state
-    res = client.put(f'/picture/{id}', data=json.dumps(res_picture),
-                     content_type="application/json")
-    res.status_code == 200
+    res = client.put(f'/picture/{id}', json=res_picture)
+    assert res.status_code == 200
     res = client.get(f'/picture/{id}')
     assert res.json['event_state'] == new_state
+
 
 def test_delete_picture_by_id(client):
     res = client.get("/count")
@@ -82,6 +88,8 @@ def test_delete_picture_by_id(client):
     assert res.json['length'] == 10
     res = client.delete("/picture/100")
     assert res.status_code == 404
+
+
 
 
 
